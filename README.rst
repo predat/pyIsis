@@ -2,7 +2,7 @@ pyIsis: python wrapper for Avid Management Console
 ==================================================
 
 pyIsis is a python wrapper that try to mimic Avis Isis Management Console
-web service. It can monipulate workspaces, users, groups and permissions.
+web service. It can manipulate workspaces, users, groups and permissions.
 It can also manage snapshots, etc...
 
 It's my first module, so there is a lot of work to do.
