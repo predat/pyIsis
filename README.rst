@@ -13,8 +13,16 @@ Installing
 ----------
 
 From the source:
+
 ```
 ./setup.py install
 ```
 
+TODO:
+-----
+- Test workspace creation and deletion on ISIS 7000 and 5500
+- Handle user permissions correctly
+- Add documentations
+- Add examples
+- More pythonic style to do things...
 
