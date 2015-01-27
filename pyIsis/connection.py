@@ -76,6 +76,7 @@ class SOAPConnection(Connection):
         url = ISIS_SOAP_URL.format(hostname=self._hostname,
                                    port=ISIS_SOAP_PORT)
         self._client = Client(url)
+        self.set_byte_count_divisor('1048576')
 
 
     def __del__(self):
