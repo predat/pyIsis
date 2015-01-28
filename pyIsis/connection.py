@@ -113,6 +113,8 @@ class SOAPConnection(Connection):
         user = self.get_user(name)
         if user:
             return self._client.service.GetUserDetails(self._token, user.outID)
+        else:
+            return None
 
 
     def create_user(self, name):
@@ -132,8 +134,29 @@ class SOAPConnection(Connection):
 
 
     def change_user_perm(self, username, workspace, permissions=ISIS_USER_NONE):
-        # TODO:
-        pass
+        user = self.get_user_details(username)
+        if user:
+            modify_user = copy.deepcopy(user)
+            modify_user.userGroupMemberships.userGroupMembership = []
+            user.userGroupMemberships.userGroupMembership = []
+            for acc in user.workspaceAccesses.access:
+                if acc.outName == workspace:
+                    user.workspaceAccesses.access = [acc]
+                    break
+
+            workspace_to_add = self.get_workspace(workspace)
+            if workspace_to_add:
+                wp_access = self._client.factory.create('ns1:WorkspaceAccess')
+                wp_access.outID = workspace_to_add.outID
+                wp_access.outName = workspace_to_add.ioName
+                wp_access.ioAccess = permissions
+                modify_user.workspaceAccesses.access = [wp_access]
+                return self._client.service.ModifyUserDetails(self._token,
+                                                          user, modify_user)
+            else:
+                return None
+        else:
+            return None
 
 
     def get_groups(self):
