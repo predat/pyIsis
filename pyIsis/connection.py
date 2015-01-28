@@ -76,6 +76,7 @@ class SOAPConnection(Connection):
         url = ISIS_SOAP_URL.format(hostname=self._hostname,
                                    port=ISIS_SOAP_PORT)
         self._client = Client(url)
+        self._client.options.cache.setduration(days=31)
         self.set_byte_count_divisor('1048576')
 
 
@@ -280,5 +281,6 @@ class WEBConnection(Connection):
 
     def do_ping(self, host):
         return self._send({'r': 'doPing', 'host': host})
+
 
 
