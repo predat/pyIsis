@@ -5,6 +5,7 @@ import urllib
 import urllib2
 from urllib2 import HTTPError, URLError
 import copy
+from pprint import pprint as pp
 
 import suds
 from suds.client import Client
@@ -116,6 +117,15 @@ class SOAPConnection(Connection):
         else:
             return None
 
+
+    def get_user_perm(self, username, workspace):
+        user = self.get_user_details(username)
+        if user:
+            for acc in user.workspaceAccesses.access:
+                if workspace in acc['outName']: 
+                    return int(acc['ioAccess'])
+        return None
+ 
 
     def create_user(self, name):
         self.__check_name__(name)
