@@ -7,31 +7,46 @@ def mount_workspace(server,workspacename,username,password,mountpoint):
     system = platform.system()
     if system == "Darwin":
         cmd_format = "/sbin/mount_AvidUnityISIS -U {username}:{password} {server}:{workspacename} {mountpoint}"
-        print cmd_format
     elif system == "Linux":
         cmd_format = "/sbin/mount.avidfos {username}:{password}@{server}/{workspacename} {mountpoint}"
     else:
         cmd_format = ''
 
-    cmd = cmd_format.format(server=server,
-                            workspacename=workspacename,
-                            username=username,
-                            password=password,
-                            mountpoint=mountpoint)
-    process = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
-    process.wait()
+    if not is_workspace_mount(mountpoint):
+        cmd = cmd_format.format(server=server,
+                                workspacename=workspacename,
+                                username=username,
+                                password=password,
+                                mountpoint=mountpoint)
+        process = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
+        process.wait()
 
-    code = process.returncode
-    if code != 0:
-        if code == 13:
-            print "Username %s has no access to workspace %s." % \
-                    (username, workspacename)
-        if code == 3:
-            print "Workspace %s does not exits or unreachable." % \
-                    workspacename
-        return False
+        code = process.returncode
+        if code != 0:
+            if code == 13:
+                print "Username %s has no access to workspace %s." % \
+                        (username, workspacename)
+            if code == 3:
+                print "Workspace %s does not exits or unreachable." % \
+                        workspacename
+            return False
+        else:
+            return True
     else:
         return True
+
+
+def is_workspace_mount(mountpoint):
+    system = platform.system()
+    if system == "Darwin" or system == "Linux":
+        cmd = "mount|grep %s" % mountpoint
+        process = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
+        std, err = process.communicate()
+        if len(std) > 0:
+            return True
+        else:
+            return False
+    return False
 
 
 def umount_workspace(mountpoint):
