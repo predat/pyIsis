@@ -7,7 +7,7 @@ from urllib2 import HTTPError, URLError
 import copy
 import suds
 from suds.client import Client
-from utils import xml2obj
+import xmltodict
 
 
 ISIS_AGENT = '12345'
@@ -27,7 +27,7 @@ class Connection(object):
         self._username = username
         self._password = password
         self._port = port
-        self._token = None
+        self._token = {'value': None}
         self.server_url = ISIS_IDA_URL.format(hostname=self._hostname,
                                               port=self._port)
         self._check_hostname()
@@ -50,19 +50,16 @@ class Connection(object):
         values = {'r': 'createsession', 'user': self._username,
                   'pass': self._password}
         result = self._send(values)
-        self._token = result.value
+        self._token = result['token']
 
     def _send(self, values):
-        authinfo = ISIS_AUTH_INFO.format(token=self._token,
+        authinfo = ISIS_AUTH_INFO.format(token=self._token['value'],
                                          username=self._username)
         headers = {'User-Agent': '12345', 'Cookie': authinfo}
         data  = urllib.urlencode(values)
         req = urllib2.Request(self.server_url, data, headers)
         response = urllib2.urlopen(req).read()
-        obj = xml2obj(response)
-        if not isinstance(obj, basestring):
-            if obj.code == '151':
-                raise Exception('Authentication error: %s' % obj.msg)
+        obj = xmltodict.parse(response)
         return obj
 
 
@@ -78,17 +75,17 @@ class SOAPConnection(Connection):
         self.set_byte_count_divisor('1048576')
 
     def __del__(self):
-        if self._token:
-            self._client.service.Logout(self._token)
+        if self._token['value']:
+            self._client.service.Logout(self._token['value'])
 
     def get_byte_count_divisor(self):
-        return self._client.service.GetByteCountDivisor(self._token)
+        return self._client.service.GetByteCountDivisor(self._token['value'])
 
     def set_byte_count_divisor(self, byteCnt):
-        return self._client.service.SetByteCountDivisor(self._token, byteCnt)
+        return self._client.service.SetByteCountDivisor(self._token['value'], byteCnt)
 
     def get_users(self):
-        return self._client.service.GetUsers(self._token)['users']['user']
+        return self._client.service.GetUsers(self._token['value'])['users']['user']
 
     def get_user(self, name):
         users = self.get_users()
@@ -100,7 +97,7 @@ class SOAPConnection(Connection):
     def get_user_details(self, name):
         user = self.get_user(name)
         if user:
-            return self._client.service.GetUserDetails(self._token, user.outID)
+            return self._client.service.GetUserDetails(self._token['value'], user.outID)
         else:
             return None
 
@@ -114,17 +111,17 @@ class SOAPConnection(Connection):
 
     def create_user(self, name):
         self.__check_name__(name)
-        base = self._client.service.GetUserDetails(self._token, 'Create')
+        base = self._client.service.GetUserDetails(self._token['value'], 'Create')
         user = copy.copy(base)
         user.ioName = name
-        return self._client.service.ModifyUserDetails(self._token, base, user)
+        return self._client.service.ModifyUserDetails(self._token['value'], base, user)
 
     def delete_user(self, name):
         user = self.get_user(name)
         if user:
             user_wrapper = self.client.factory.create('ns1:UsersWrapper')
             user_wrapper.users.user = [user]
-            return self._client.service.DeleteUsers(self._token, user_wrapper)
+            return self._client.service.DeleteUsers(self._token['value'], user_wrapper)
 
     def change_user_perm(self, username, workspace, permissions=ISIS_USER_NONE):
         user = self.get_user_details(username)
@@ -144,7 +141,7 @@ class SOAPConnection(Connection):
                 wp_access.outName = workspace_to_add.ioName
                 wp_access.ioAccess = permissions
                 modify_user.workspaceAccesses.access = [wp_access]
-                return self._client.service.ModifyUserDetails(self._token,
+                return self._client.service.ModifyUserDetails(self._token['value'],
                                                           user, modify_user)
             else:
                 return None
@@ -152,7 +149,7 @@ class SOAPConnection(Connection):
             return None
 
     def get_groups(self):
-        return self._client.service.GetUserGroups(self._token)['usergroups']['user']
+        return self._client.service.GetUserGroups(self._token['value'])['usergroups']['user']
 
     def get_group(self, name):
         groups = self.get_groups()
@@ -164,24 +161,24 @@ class SOAPConnection(Connection):
     def get_group_details(self, name):
         group = self.get_group(name)
         if group:
-            return self._client.service.GetUserGroupDetails(self._token, group.outID)
+            return self._client.service.GetUserGroupDetails(self._token['value'], group.outID)
 
     def create_group(self, name):
         self.__check_name__(name)
-        base = self._client.service.GetUserGroupDetails(self._token, 'Create')
+        base = self._client.service.GetUserGroupDetails(self._token['value'], 'Create')
         group = copy.copy(base)
         group.ioName = name
-        return self._client.service.ModifyGroupDetails(self._token, base, group)
+        return self._client.service.ModifyGroupDetails(self._token['value'], base, group)
 
     def delete_group(self, name):
         group = self.get_group(name)
         if group:
             group_wrapper = self.client.factory.create('ns1:UsersWrapper')
             group_wrapper.users.user = [group]
-            self._client.service.DeleteUsers(self._token, group_wrapper)
+            self._client.service.DeleteUsers(self._token['value'], group_wrapper)
 
     def get_workspaces(self):
-        return self._client.service.GetWorkspaces(self._token)['workspaces']['workspace']
+        return self._client.service.GetWorkspaces(self._token['value'])['workspaces']['workspace']
 
     def get_workspace(self, name):
         workspaces = self.get_workspaces()
@@ -193,12 +190,12 @@ class SOAPConnection(Connection):
     def get_workspace_details(self, name):
         workspace = self.get_workspace(name)
         if workspace:
-            return self._client.service.GetWorkspaceDetails(self._token, workspace.outID)
+            return self._client.service.GetWorkspaceDetails(self._token['value'], workspace.outID)
 
     def create_workspace(self, name='default_name', capacity=100, *options):
         self.__check_name__(name)
         self.set_byte_count_divisor()
-        base = self._client.service.GetWorkspaceDetails(self._token, 'Create')
+        base = self._client.service.GetWorkspaceDetails(self._token['value'], 'Create')
         base.userAccesses = []
         base.outStorageGroups = []
         workspace = copy.copy(base)
@@ -208,14 +205,14 @@ class SOAPConnection(Connection):
         if self.server_info.serverType == ISIS_5000:
             workspace.ioProtectionMode = 16
 
-        return self.client._service.ModifyWorkspaceDetails(self._token, base, workspace)
+        return self.client._service.ModifyWorkspaceDetails(self._token['value'], base, workspace)
 
     def delete_workspace(self, name):
         workspace = self.get_workspace(name)
         if workspace:
             workspace_wrapper = self._client.factory.create('ns1:WorkspacesWrapper')
             workspace_wrapper.workspaces.workspace = [workspace]
-            self._client.service.DeleteWorkspaces(self._token, workspace_wrapper)
+            self._client.service.DeleteWorkspaces(self._token['value'], workspace_wrapper)
 
 
 class WEBConnection(Connection):
