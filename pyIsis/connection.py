@@ -71,8 +71,8 @@ class Connection(object):
 
 class SOAPConnection(Connection):
 
-    def __init__(self, hostname, username, passsword):
-        Connection.__init__(self, hostname, username, passsword)
+    def __init__(self, hostname, username, password):
+        Connection.__init__(self, hostname, username, password)
         
         url = ISIS_SOAP_URL.format(hostname=self._hostname,
                                    port=ISIS_SOAP_PORT)
@@ -252,8 +252,8 @@ class SOAPConnection(Connection):
 
 class WEBConnection(Connection):
 
-    def __init__(self, hostname, username, passsword):
-        Connection.__init__(self, hostname, username, passsword)
+    def __init__(self, hostname, username, password):
+        Connection.__init__(self, hostname, username, password)
     
 
     def get_server_info(self):
