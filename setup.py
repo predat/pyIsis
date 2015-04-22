@@ -29,7 +29,7 @@ setup(name='pyIsis',
       license='MIT',
       packages=['pyIsis'],
       include_package_data=True,
-      install_requires=['suds'],
+      install_requires=['suds','xmltodict'],
       zip_safe=False)
   
 
