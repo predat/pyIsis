@@ -33,12 +33,18 @@ class Connection(object):
         self._password = password
         self._port = port
         self._token = None
-
         self.server_url = ISIS_IDA_URL.format(hostname=self._hostname,
                                               port=self._port)
-
         self._check_hostname()
         self._login()
+
+
+    def __repr__(self):
+        return '{}("{}", "{}", "{}")'.format(
+            self.__class__.__name__,
+            self._hostname,
+            self._username,
+            self._password)
 
 
     def _check_hostname(self):
@@ -49,7 +55,7 @@ class Connection(object):
 
 
     def _login(self):
-        values = {'r': 'createsession', 'user': self._username, 
+        values = {'r': 'createsession', 'user': self._username,
                   'pass': self._password}
         result = self._send(values)
         self._token = result.value
@@ -73,7 +79,7 @@ class SOAPConnection(Connection):
 
     def __init__(self, hostname, username, password):
         Connection.__init__(self, hostname, username, password)
-        
+ 
         url = ISIS_SOAP_URL.format(hostname=self._hostname,
                                    port=ISIS_SOAP_PORT)
         self._client = Client(url)
@@ -85,15 +91,15 @@ class SOAPConnection(Connection):
         if self._token:
             self._client.service.Logout(self._token)
 
-    
+
     def __str__(self):
         return 'STRING'
 
-    
+
     def get_byte_count_divisor(self):
         return self._client.service.GetByteCountDivisor(self._token)
 
-    
+
     def set_byte_count_divisor(self, byteCnt):
         return self._client.service.SetByteCountDivisor(self._token, byteCnt)
 
@@ -109,7 +115,7 @@ class SOAPConnection(Connection):
                 return user
         return None
 
-    
+
     def get_user_details(self, name):
         user = self.get_user(name)
         if user:
@@ -122,10 +128,10 @@ class SOAPConnection(Connection):
         user = self.get_user_details(username)
         if user:
             for acc in user.workspaceAccesses.access:
-                if workspace in acc['outName']: 
+                if workspace in acc['outName']:
                     return int(acc['ioAccess'])
         return None
- 
+
 
     def create_user(self, name):
         self.__check_name__(name)
@@ -134,7 +140,7 @@ class SOAPConnection(Connection):
         user.ioName = name
         return self._client.service.ModifyUserDetails(self._token, base, user)
 
-    
+
     def delete_user(self, name):
         user = self.get_user(name)
         if user:
@@ -254,7 +260,7 @@ class WEBConnection(Connection):
 
     def __init__(self, hostname, username, password):
         Connection.__init__(self, hostname, username, password)
-    
+
 
     def get_server_info(self):
         return self._send({'r': 'GetSystemDirectorInfo'})
@@ -264,7 +270,7 @@ class WEBConnection(Connection):
         values = {'r': 'GetInstallerLinks'}
         return self._send(values)
 
-    
+
     def get_installer(self, platform):
         element_list = self.get_installer_links()['list']
         for elmt in element_list:
@@ -278,7 +284,7 @@ class WEBConnection(Connection):
 
     def get_snapshots(self):
         result = self._send({ 'r': 'GetSnapshots'})
-        
+
         if isinstance(result, str):
             return None
         if result.snapshot:
@@ -298,7 +304,7 @@ class WEBConnection(Connection):
     def create_archive(self, name):
         return self._send({ 'r': 'GenerateNewArchive', 'name': name})
 
-    
+
     def delete_archive(self, name):
         return self._send({ 'r': 'DeleteArchiveFile', 'name': name})
 
