@@ -19,6 +19,9 @@ ISIS_USER_NONE = 0
 ISIS_IDA_URL='http://{hostname}:{port}/v2/ida&rndval=1421067633746'
 ISIS_AUTH_INFO='avidagent=12345; AdminServerToken={token}; AgentLoginName={username}'
 
+class LoginError(Exception):
+    pass
+
 
 class Connection(object):
 
@@ -50,7 +53,10 @@ class Connection(object):
         values = {'r': 'createsession', 'user': self._username,
                   'pass': self._password}
         result = self._send(values)
-        self._token = result['token']
+        if 'token' in result:
+            self._token = result['token']
+        else:
+            raise LoginError
 
     def _send(self, values):
         authinfo = ISIS_AUTH_INFO.format(token=self._token['value'],
