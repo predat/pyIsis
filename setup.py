@@ -23,14 +23,13 @@ setup(name='pyIsis',
           'Topic :: Utilities'
       ],
       keywords='avid isis client mount workspace',
-      url='http://git.highwaytv.net/pyIsis',
+      url='http://github.com/predat/pyIsis',
       author='Sylvain Maziere',
       author_email='sylvain@predat.fr',
       license='MIT',
       packages=['pyIsis'],
       include_package_data=True,
-      install_requires=['suds','xmltodict'],
+      install_requires=['osa'],
       zip_safe=False)
-  
 
 

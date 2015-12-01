@@ -11,5 +11,5 @@ __maintainer__ = "Sylvain Maziere"
 __email__ = "sylvain@predat.fr"
 __status__ = "Development"
 
-from connection import SOAPConnection, WEBConnection
+from connection import Client
 
