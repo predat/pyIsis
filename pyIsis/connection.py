@@ -201,8 +201,51 @@ class Client(object):
             return xmltodict.parse(response)
         return None
 
-
     def get_server_info(self):
         return self._send({'r': 'GetSystemDirectorInfo'})
+
+    def get_installer_links(self):
+        values = {'r': 'GetInstallerLinks'}
+        return self._send(values)
+
+    def get_installer(self, platform):
+        element_list = self.get_installer_links()['list']['list']
+        for elmt in element_list:
+            if elmt['@display'] == 'ISISClient/':
+                for install in elmt['element']:
+                    url = "http://"+self.hostname+'/'+install['url']
+                    name = url.split('/')[-1:][0]
+                    if platform in name:
+                        found = True
+                        urllib.urlretrieve(url, name)
+
+    def get_snapshots(self):
+        result = self._send({ 'r': 'GetSnapshots'})
+        if isinstance(result, str):
+            return None
+        if result['snapShots']:
+            return result['snapShots']
+        return None
+
+    def create_snapshot(self, name):
+        return self._send({ 'r': 'GenerateNewSnapshot', 'name': name})
+
+    def delete_snapshot(self, name):
+        return self._send({ 'r': 'DeleteSnapshotFile', 'name': name})
+
+    def create_archive(self, name):
+        return self._send({ 'r': 'GenerateNewArchive', 'name': name})
+
+    def delete_archive(self, name):
+        return self._send({ 'r': 'DeleteArchiveFile', 'name': name})
+
+    def get_netstats(self):
+        return self._send({'r': 'getNetStatus'})
+
+    def do_traceroute(self, host):
+        return self._send({'r': 'doTraceroute', 'host': host})
+
+    def do_ping(self, host):
+        return self._send({'r': 'doPing', 'host': host})
 
 
