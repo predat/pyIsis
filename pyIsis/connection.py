@@ -3,6 +3,9 @@
 import sys
 import copy
 import osa
+import urllib
+import urllib2
+import xmltodict
 
 
 ISIS_AGENT = '12345'
@@ -184,5 +187,22 @@ class Client(object):
 
     def total(self):
         return int(self.get_system_info().outReservedByteCount)
+
+
+    def _send(self, values):
+        url = 'http://%s/v2/ida' % self.hostname
+        authinfo = 'avidagent=12345; AdminServerToken=%s; AgentLoginName=%s' % \
+                (self.token, self.username)
+        headers = {'User-Agent': '12345', 'Cookie': authinfo}
+        data = urllib.urlencode(values)
+        req = urllib2.Request(url, data, headers)
+        response = urllib2.urlopen(req).read()
+        if response:
+            return xmltodict.parse(response)
+        return None
+
+
+    def get_server_info(self):
+        return self._send({'r': 'GetSystemDirectorInfo'})
 
 

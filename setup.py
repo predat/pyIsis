@@ -29,7 +29,7 @@ setup(name='pyIsis',
       license='MIT',
       packages=['pyIsis'],
       include_package_data=True,
-      install_requires=['osa'],
+      install_requires=['osa','xmltodict'],
       zip_safe=False)
 
 
