@@ -22,8 +22,23 @@ class LoginError(Exception):
 
 
 class Client(object):
+    """ A Class to management Avid Isis Storage from python.
+
+        :Example:
+
+        >>> from pyIsis import Client
+        >>> client = Client(hostname="servername",
+                            username="Administrator",
+                            password="thepassword")
+        >>> client.get_workspaces()
+    """
 
     def __init__(self, hostname, username, password):
+        """
+            :param hostname: hostname or ip of the Avid Isis Storage server
+            :param username: a valid username
+            :param password: password of the user
+        """
         self.hostname = hostname
         self.username = username
         self.password = password
@@ -44,12 +59,21 @@ class Client(object):
         return self._client.service.GetByteCountDivisor(self.token)
 
     def set_byte_count_divisor(self, byteCnt):
+        """ Set byte divisor for all return capacity values """
         return self._client.service.SetByteCountDivisor(self.token, str(byteCnt))
 
     def get_users(self):
+        """
+            :return: list of all users in Avid Isis Storage
+            :rtype: list
+        """
         return self._client.service.GetUsers(self.token).users.user
 
     def get_user(self, name):
+        """
+            :return: user informations
+            :rtype: osa.xmltypes.UserSummary (dict)
+        """
         users = self.get_users()
         for user in users:
             if name in user.ioName:
@@ -57,6 +81,10 @@ class Client(object):
         return None
 
     def get_user_details(self, name):
+        """
+            :return: user details (Workspace access and group membership)
+            :rtype: osa.xmltypes.UserDetails (dict)
+        """
         user = self.get_user(name)
         if user:
             return self._client.service.GetUserDetails(self.token, user.outID)
@@ -205,7 +233,14 @@ class Client(object):
         return None
 
     def get_server_info(self):
+        """ Get basic information about your system and your network.
+            Those informations are accessible from Avid import ISIS Launch Pad.
+        """
         return self._send({'r': 'GetSystemDirectorInfo'})
+
+    def get_sys_info(self):
+        """ Get more complete information about your system and your network. """
+        return self._send({'r': 'getSysInfo'})
 
     def get_installer_links(self):
         return self._send({'r': 'GetInstallerLinks'})
@@ -242,14 +277,44 @@ class Client(object):
         return self._send({ 'r': 'DeleteArchiveFile', 'name': name})
 
     def get_netstats(self):
+        """  Get statistics for IPv4 and IPv6, TCP and UDP. """
         return self._send({'r': 'getNetStatus'})
 
     def do_traceroute(self, host):
+        """ Allows you to verify the path between a system in the shared
+            storage network and the System Director.
+
+            :param host: hostname or ip address
+        """
         return self._send({'r': 'doTraceroute', 'host': host})
 
     def do_ping(self, host):
+        """ Allows you to test the connection between a system in the shared
+            storage network and the System Director.
+
+            :param host: hostname or ip address
+        """
         return self._send({'r': 'doPing', 'host': host})
 
     def get_event_log(self, type="System", count=100):
+        """ Retrieve system messages, info, warnings and errors at the
+            application, system and security level.
+
+            :param type: select log type. Can be 'System', 'Application' or 'Security'
+            :param count: number of event to retrieve
+
+            :return: list of events
+            :rtype: list
+        """
         return self._send({'r': 'getEventLog', 'type': type, 'count': count})
+
+    def get_admin_log(self):
+        """ Retrieve current actions reported by the ISIS Management Console,
+            including informational messages (such as when upgrades occur),
+            errors, and warnings.
+
+            :return: list of actions
+            :rtype: list
+        """
+        return self._send({'r': 'GetAdminToolLogFile', 'lfName': 'AdminToolLog.csv'})
 
