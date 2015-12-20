@@ -198,15 +198,17 @@ class Client(object):
         req = urllib2.Request(url, data, headers)
         response = urllib2.urlopen(req).read()
         if response:
-            return xmltodict.parse(response)
+            try:
+                return xmltodict.parse(response)
+            except xmltodict.expat.ExpatError:
+                return eval(response)
         return None
 
     def get_server_info(self):
         return self._send({'r': 'GetSystemDirectorInfo'})
 
     def get_installer_links(self):
-        values = {'r': 'GetInstallerLinks'}
-        return self._send(values)
+        return self._send({'r': 'GetInstallerLinks'})
 
     def get_installer(self, platform):
         element_list = self.get_installer_links()['list']['list']
@@ -248,4 +250,6 @@ class Client(object):
     def do_ping(self, host):
         return self._send({'r': 'doPing', 'host': host})
 
+    def get_event_log(self, type="System", count=100):
+        return self._send({'r': 'getEventLog', 'type': type, 'count': count})
 
