@@ -9,15 +9,15 @@ It's my first module, so there is a lot of work to do.
 
 
 
-Installing
-----------
+Installation
+------------
 
-From the source:
+From the source directory:
 
-```
-pip install -r requirements.txt
-python setup.py install
-```
+.. code-block:: bash
+    pip install -r requirements.txt;
+    python setup.py install
+
 
 TODO:
 -----
