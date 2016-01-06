@@ -20,6 +20,9 @@ ISIS_USER_NONE = 0
 class LoginError(Exception):
     pass
 
+class HostnameError(Exception):
+    pass
+
 
 class Client(object):
     """ A Class to management Avid Isis Storage from python.
@@ -45,10 +48,19 @@ class Client(object):
 
         url = ISIS_SOAP_URL.format(hostname=self.hostname,
                                    port=ISIS_SOAP_PORT)
-        self._client = osa.Client(url)
-        self.token = self._client.service.Login(ISIS_AGENT,
+
+        try:
+            self._client = osa.Client(url)
+        except urllib2.URLError:
+            raise HostnameError("Hostname not found.")
+
+        try:
+            self.token = self._client.service.Login(ISIS_AGENT,
                                                 self.username,
                                                 self.password)
+        except ValueError:
+            raise LoginError("Username or password invalid.")
+
         self.set_byte_count_divisor(1024*1024)
 
     def __del__(self):
