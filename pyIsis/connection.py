@@ -318,3 +318,9 @@ class Client(object):
         """
         return self._send({'r': 'GetAdminToolLogFile', 'lfName': 'AdminToolLog.csv'})
 
+    def reset_status_event(self):
+        """ Reset events into Avid ISIS Launch Pad.
+        """
+        return self._send({'r': 'ResetEventStatus'})
+
+
