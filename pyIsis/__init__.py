@@ -7,7 +7,7 @@ import os
 
 __all__ = ['client','connection','utils','filesystem']
 __author__ = "Sylvain Maziere"
-__license__ = "GPL"
+__license__ = "MIT"
 __maintainer__ = "Sylvain Maziere"
 __email__ = "sylvain@predat.fr"
 __status__ = "Development"
