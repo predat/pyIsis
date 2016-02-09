@@ -1,13 +1,22 @@
 #!/usr/bin/env python
+import os
 from setuptools import setup
-from pyIsis import __version__
+
+
+PKG_NAME = "pyIsis"
 
 def readme():
     with open('README.rst') as f:
         return f.read()
 
-setup(name='pyIsis',
-      version=__version__,
+def version():
+    version_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),PKG_NAME,'VERSION')
+    with open(version_file,'rb') as fp:
+        _version = fp.read().strip()
+    return _version
+
+setup(name=PKG_NAME,
+      version=version(),
       description='Python wrapper for Avid Isis Client Management Console',
       long_description=readme(),
       classifiers=[
