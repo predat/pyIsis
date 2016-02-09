@@ -1,4 +1,4 @@
 include README.rst
 include doc/*.txt
 include requirements.txt
-include VERSION
+include pyIsis/VERSION
