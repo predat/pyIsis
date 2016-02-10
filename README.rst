@@ -20,6 +20,8 @@ From the source directory:
 
 .. code-block:: bash
 
+  git clone https://github.com/predat/pyIsis.git
+  cd pyIsis
   pip install -r requirements.txt
   python setup.py install
 
