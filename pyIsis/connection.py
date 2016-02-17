@@ -52,7 +52,7 @@ class Client(object):
         try:
             self._client = osa.Client(url)
         except urllib2.URLError:
-            raise HostnameError("Hostname not found.")
+            raise HostnameError("Hostname %s not found." % self.hostname)
 
         try:
             self.token = self._client.service.Login(ISIS_AGENT,
@@ -222,11 +222,15 @@ class Client(object):
 
 
     def used(self):
-        return int(self.get_system_info().outUsedByteCount)
+        infos = self.get_server_info()
+        used = float(infos['sysdirInfo']['sgUsedByteCount']) / 1024 / 1024 / 1024 / 1024
+        return used
 
 
     def total(self):
-        return int(self.get_system_info().outReservedByteCount)
+        infos = self.get_server_info()
+        total = float(infos['sysdirInfo']['sgByteCount']) / 1024 / 1024 / 1024 / 1024
+        return total
 
 
     def _send(self, values):
@@ -333,6 +337,10 @@ class Client(object):
     def reset_status_event(self):
         """ Reset events into Avid ISIS Launch Pad.
         """
-        return self._send({'r': 'ResetEventStatus'})
+        res = self._send({'r': 'ResetEventStatus'})
+        try:
+            return res['cmd_result']['status'] == 'success'
+        except:
+            return False
 
 
