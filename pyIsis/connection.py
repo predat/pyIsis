@@ -130,6 +130,27 @@ class Client(object):
         else:
             return None
 
+    def add_user_to_group(self, username, groupname):
+        group = self.get_group_details(groupname)
+        if group:
+            group.workspaceAccesses = self._client.types.WorkspaceAccesses()
+            user = self.get_user(username)
+            if user:
+                for idx, u in enumerate(group.userMemberships.userGroupMembership):
+                    if u.outUserGroupName == user.ioName:
+                        group.userMemberships.userGroupMembership = [u]
+                        break
+                m_group = copy.deepcopy(group)
+                m_group.userMemberships.userGroupMembership[0].ioUserGroupMembership = 1
+
+                return self._client.service.ModifyUserGroupDetails(self.token,
+                                                                   group,
+                                                                   m_group)
+            else:
+                return None
+        else:
+            return None
+
     def change_user_perm(self, username, workspace, permissions=ISIS_USER_NONE):
         user = self.get_user_details(username)
         if user:
@@ -169,6 +190,8 @@ class Client(object):
         group = self.get_group(name)
         if group:
             return self._client.service.GetUserGroupDetails(self.token, group.outID)
+        else:
+            return None
 
     def create_group(self, name):
         if not self.get_group(name):
