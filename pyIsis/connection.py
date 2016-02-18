@@ -112,11 +112,14 @@ class Client(object):
         return None
 
     def create_user(self, name):
-        self.__check_name__(name)
-        base = self._client.service.GetUserDetails(self.token, 'Create')
-        user = copy.copy(base)
-        user.ioName = name
-        return self._client.service.ModifyUserDetails(self.token, base, user)
+        if not self.get_user(name):
+            base = self._client.service.GetUserDetails(self.token, 'Create')
+            user = copy.copy(base)
+            user.ioName = name
+            return self._client.service.ModifyUserDetails(self.token,
+                                                          base, user)
+        else:
+            return None
 
     def delete_user(self, name):
         user = self.get_user(name)
@@ -124,6 +127,8 @@ class Client(object):
             user_wrapper = self._client.types.UsersWrapper(deep=True)
             user_wrapper.users.user = [user]
             return self._client.service.DeleteUsers(self.token, user_wrapper)
+        else:
+            return None
 
     def change_user_perm(self, username, workspace, permissions=ISIS_USER_NONE):
         user = self.get_user_details(username)
@@ -166,11 +171,13 @@ class Client(object):
             return self._client.service.GetUserGroupDetails(self.token, group.outID)
 
     def create_group(self, name):
-        self.__check_name__(name)
-        base = self._client.service.GetUserGroupDetails(self.token, 'Create')
-        group = copy.copy(base)
-        group.ioName = name
-        return self._client.service.ModifyGroupDetails(self.token, base, group)
+        if not self.get_group(name):
+            base = self._client.service.GetUserGroupDetails(self.token, 'Create')
+            group = copy.copy(base)
+            group.ioName = name
+            return self._client.service.ModifyUserGroupDetails(self.token, base, group)
+        else:
+            return None
 
     def delete_group(self, name):
         group = self.get_group(name)
