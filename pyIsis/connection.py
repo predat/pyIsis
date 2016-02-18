@@ -151,6 +151,26 @@ class Client(object):
         else:
             return None
 
+    def remove_user_from_group(self, username, groupname):
+        group = self.get_group_details(groupname)
+        if group:
+            group.workspaceAccesses = self._client.types.WorkspaceAccesses()
+            user = self.get_user(username)
+            if user:
+                for u in group.userMemberships.userGroupMembership:
+                    if u.outUserGroupName == user.ioName:
+                        group.userMemberships.userGroupMembership = [u]
+                        break
+                m_group = copy.deepcopy(group)
+                m_group.userMemberships.userGroupMembership[0].ioUserGroupMembership = 0
+                return self._client.service.ModifyUserGroupDetails(self.token,
+                                                                   group,
+                                                                   m_group)
+            else:
+                return None
+        else:
+            return None
+
     def change_user_perm(self, username, workspace, permissions=ISIS_USER_NONE):
         user = self.get_user_details(username)
         if user:
