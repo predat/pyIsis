@@ -216,13 +216,11 @@ class Client(object):
 
     def update_workspace_capacity(self, name="", capacity=None):
         workspace = self.get_workspace_details(name)
-        #for k, v in kwargs.iteritems():
-        #    if k == 'capacity':
-        #        pass
         modify_workspace = copy.deepcopy(workspace)
         modify_workspace.ioByteCount = int(capacity)
-
-        return self._client.service.ModifyWorkspaceDetails(self.token, workspace, modify_workspace)
+        return self._client.service.ModifyWorkspaceDetails(self.token,
+                                                           workspace,
+                                                           modify_workspace)
 
 
     def delete_workspace(self, name):
