@@ -210,11 +210,20 @@ class Client(object):
         workspace = copy.copy(base)
         workspace.ioName = name
         workspace.ioByteCount = str(capacity)
-
         if self.server_info.serverType == ISIS_5000:
             workspace.ioProtectionMode = 16
+        return self._client._service.ModifyWorkspaceDetails(self.token, base, workspace)
 
-        return self.client._service.ModifyWorkspaceDetails(self.token, base, workspace)
+    def update_workspace_capacity(self, name="", capacity=None):
+        workspace = self.get_workspace_details(name)
+        #for k, v in kwargs.iteritems():
+        #    if k == 'capacity':
+        #        pass
+        modify_workspace = copy.deepcopy(workspace)
+        modify_workspace.ioByteCount = int(capacity)
+
+        return self._client.service.ModifyWorkspaceDetails(self.token, workspace, modify_workspace)
+
 
     def delete_workspace(self, name):
         workspace = self.get_workspace(name)
