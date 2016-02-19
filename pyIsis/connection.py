@@ -260,7 +260,12 @@ class Client(object):
     def update_workspace_capacity(self, name="", capacity=None):
         workspace = self.get_workspace_details(name)
         modify_workspace = copy.deepcopy(workspace)
-        modify_workspace.ioByteCount = int(capacity)
+        if '+' in capacity:
+            modify_workspace.ioByteCount =  modify_workspace.ioByteCount + (int(capacity) * 1024)
+        elif '-' in capacity:
+            modify_workspace.ioByteCount =  modify_workspace.ioByteCount - (int(capacity) * 1024)
+        else:
+            modify_workspace.ioByteCount = int(capacity)
         return self._client.service.ModifyWorkspaceDetails(self.token,
                                                            workspace,
                                                            modify_workspace)
