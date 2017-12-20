@@ -45,6 +45,9 @@ class Client(object):
         self.hostname = hostname
         self.username = username
         self.password = password
+        
+        # must be present for __del__ to gracefully exit failed session
+        self.token = None
 
         url = ISIS_SOAP_URL.format(hostname=self.hostname,
                                    port=ISIS_SOAP_PORT)
