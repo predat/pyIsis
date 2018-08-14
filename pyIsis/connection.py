@@ -36,21 +36,23 @@ class Client(object):
         >>> client.get_workspaces()
     """
 
-    def __init__(self, hostname, username, password):
+    def __init__(self, hostname, username, password, port=ISIS_SOAP_PORT):
         """
             :param hostname: hostname or ip of the Avid Isis Storage server
             :param username: a valid username
             :param password: password of the user
+            :param port:     the port of the legacy web interface (80 or 3002)
         """
         self.hostname = hostname
         self.username = username
         self.password = password
+        self.port = port
         
         # must be present for __del__ to gracefully exit failed session
         self.token = None
 
         url = ISIS_SOAP_URL.format(hostname=self.hostname,
-                                   port=ISIS_SOAP_PORT)
+                                   port=self.port)
 
         try:
             self._client = osa.Client(url)
@@ -299,7 +301,7 @@ class Client(object):
 
 
     def _send(self, values):
-        url = 'http://%s/v2/ida' % self.hostname
+        url = 'http://%s:%s/v2/ida' % (self.hostname, self.port)
         authinfo = 'avidagent=12345; AdminServerToken=%s; AgentLoginName=%s' % \
                 (self.token, self.username)
         headers = {'User-Agent': '12345', 'Cookie': authinfo}
