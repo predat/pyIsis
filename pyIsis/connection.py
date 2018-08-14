@@ -36,7 +36,7 @@ class Client(object):
         >>> client.get_workspaces()
     """
 
-    def __init__(self, hostname, username, password, port=80):
+    def __init__(self, hostname, username, password, port=ISIS_SOAP_PORT):
         """
             :param hostname: hostname or ip of the Avid Isis Storage server
             :param username: a valid username
